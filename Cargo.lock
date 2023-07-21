@@ -3,7 +3,7 @@
 version = 3
 
 [[package]]
-name = "adin1110-rs"
+name = "adin1110"
 version = "0.1.0"
 dependencies = [
  "bitfield-struct",

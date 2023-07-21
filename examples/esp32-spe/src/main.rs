@@ -3,7 +3,19 @@
 
 use esp_backtrace as _;
 use esp_println::println;
-use hal::{clock::ClockControl, peripherals::Peripherals, prelude::*, timer::TimerGroup, Rtc};
+use hal::{
+    prelude::*,
+    peripherals::Peripherals,
+    clock::ClockControl,
+    timer::TimerGroup,
+    Rtc,
+    Delay,
+    gpio::IO,
+    spi::{Spi, SpiMode},
+};
+
+use adin1110::ADIN1110;
+
 #[entry]
 fn main() -> ! {
     let peripherals = Peripherals::take();
@@ -27,7 +39,58 @@ fn main() -> ! {
     rtc.rwdt.disable();
     wdt0.disable();
     wdt1.disable();
-    println!("Hello world!");
 
-    loop {}
+    let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
+    
+    let mut status_led = io.pins.gpio2.into_push_pull_output();
+
+    let sclk = io.pins.gpio18;
+    let miso = io.pins.gpio19;
+    let mosi = io.pins.gpio23;
+    let cs = io.pins.gpio5;
+
+    let mut spi = Spi::new(
+        peripherals.SPI2,
+        sclk,
+        mosi,
+        miso,
+        cs,
+        100u32.kHz(),
+        SpiMode::Mode0,
+        &mut system.peripheral_clock_control,
+        &clocks,
+    );
+
+    let mut delay = Delay::new(&clocks);
+
+    println!("Welcome to the ADIN1110-rs testing app!");
+
+    let mut adin1110 = ADIN1110::new(spi);
+
+    let mut counter = 0;
+    loop {
+        if (counter % 2) == 0 {
+            status_led.set_high().unwrap();
+        } else {
+            status_led.set_low().unwrap();
+        }
+        counter += 1;
+
+        match adin1110.get_idver() {
+            Ok(id) => println!("Id is: {:#8x?}", id),
+            Err(e) => println!("error in get_idver!"),
+        }
+
+        match adin1110.get_phyid() {
+            Ok(n) => println!("phyid is: {:#8x?}", n),
+            Err(e) => println!("Error! {:?}", e),
+        }
+
+        match adin1110.get_capability() {
+            Ok(n) => println!("capability reg is: {:#08x?}", n),
+            Err(e) => println!("error! {:?}", e),
+        }
+
+        delay.delay_ms(500u32);
+    }
 }

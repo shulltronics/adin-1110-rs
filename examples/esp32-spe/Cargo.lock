@@ -3,6 +3,14 @@
 version = 3
 
 [[package]]
+name = "adin1110"
+version = "0.1.0"
+dependencies = [
+ "bitfield-struct",
+ "embedded-hal",
+]
+
+[[package]]
 name = "aho-corasick"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -36,6 +44,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7bfc506e7a2370ec239e1d072507b2a80c833083699d3c6fa176fbb4de8448c6"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "bitfield-struct"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ef59f0fcc43c87f48e1be2fb5bae934819066bef8be717850944bb882ea232d"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.26",
 ]
 
 [[package]]
@@ -224,6 +243,7 @@ dependencies = [
 name = "esp32_spe"
 version = "0.1.0"
 dependencies = [
+ "adin1110",
  "esp-backtrace",
  "esp-println",
  "esp32-hal",
